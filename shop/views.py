@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView
+from django.views.generic.edit import FormMixin
 
+from cart.forms import CartAddProductForm
 from shop.models import Category, Product
 
 
@@ -22,11 +24,18 @@ class ProductList(ListView):
         return context
 
 
-class ProductDetail(DetailView):
+class ProductDetail(FormMixin, DetailView):
     model = Product
     template_name = 'shop/product/detail.html'
     context_object_name = 'product'
     pk_url_kwarg = "id"
     slug_url_kwarg = 'slug'
     query_pk_and_slug = True
+    form_class = CartAddProductForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['cart_product_form'] = self.form_class
+        return context
+
 

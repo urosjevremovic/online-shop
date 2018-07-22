@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.http import require_POST
 from django.views.generic import UpdateView, FormView, DeleteView, DetailView
 from django.views.generic.base import View
 
@@ -7,18 +8,17 @@ from cart.forms import CartAddProductForm
 from shop.models import Product
 
 
-class UpdateCart(FormView):
-    http_method_names = ['post', ]
-    form_class = CartAddProductForm
-    success_url = 'cart:cart_detail'
-
-    def __init__(self):
-        super().__init__()
-        self.cart = Cart(self.request)
-
-    def form_valid(self, form):
+@require_POST
+def cart_add(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    form = CartAddProductForm(request.POST)
+    if form.is_valid():
         cd = form.cleaned_data
-        self.cart.add(get_object_or_404(Product, id=self.kwargs['product_id']))
+        cart.add(product=product,
+                 quantity=cd['quantity'],
+                 update_quantity=cd['update'])
+    return redirect('cart:cart_detail')
 
 
 def cart_remove(request, product_id):
@@ -28,7 +28,6 @@ def cart_remove(request, product_id):
     return redirect('cart:cart_detail')
 
 
-class CartDetail(DetailView):
-    model = Cart
-    template_name = 'cart/detail.html'
-    context_object_name = 'cart'
+def cart_detail(request):
+    cart = Cart(request)
+    return render(request, 'cart/detail.html', {'cart': cart})
