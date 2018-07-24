@@ -8,5 +8,5 @@ app_name = 'orders'
 urlpatterns = [
     path('create/', order_create, name='order_create'),
     path('admin/order/<int:order_id>/', staff_member_required(AdminOrderDetail.as_view()), name='admin_order_detail'),
-    path('admin/order/<int:order_id>/pdf/', admin_order_pdf, name='admin_order_pdf'),
+    path('admin/order/<int:order_id>/pdf/', staff_member_required(admin_order_pdf), name='admin_order_pdf'),
 ]
