@@ -3,12 +3,13 @@ from io import BytesIO
 import braintree
 import weasyprint
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.views.generic import TemplateView
 
-from orders.models import Order 
+from online_shop.settings import EMAIL_HOST_USER
+from orders.models import Order
 
 
 def payment_process(request): 
@@ -33,9 +34,9 @@ def payment_process(request):
             order.braintree_id = result.transaction.id
             order.save()
             # create invoice e-mail
-            subject = 'My Shop - Invoice no. {}'.format(order.id)
+            subject = 'Online Shop - Invoice no. {}'.format(order.id)
             message = 'Please, find attached the invoice for your recent purchase.'
-            email = EmailMessage(subject, message, 'admin@myshop.com', [order.email])
+            email = EmailMessage(subject, message, 'urosh43@gmail.com', [order.email])
             # generate PDF
             html = render_to_string('orders/order/pdf.html', {'order': order})
             out = BytesIO()
@@ -44,6 +45,7 @@ def payment_process(request):
             # attach PDF file
             email.attach('order_{}.pdf'.format(order.id), out.getvalue(), 'application/pdf')
             # send e-mail
+            # send_mail(subject, message, 'urosh43@gmail.com', [order.email])
             email.send()
             return redirect('payment:done')
         else:
