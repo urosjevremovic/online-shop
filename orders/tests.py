@@ -1,11 +1,10 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.urls import reverse
 
 
 class OrderTest(TestCase):
 
     def setUp(self):
-        self.client = Client()
         self.valid_form_data = {
             'first_name': 'Bruno',
             'last_name': 'Mars',
